@@ -1,69 +1,83 @@
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
+import { PrismaClient } from "@prisma/client";
+import express from "express";
+import http from "http";
+import { Router } from "express";
+import { backrouter } from "./Routers/backRouters";
+import cors from "cors";
 
-const wss = new WebSocketServer({ port: 6969 });
-
+const app = express();
+app.use(express.json());
+app.use(cors());
+app.use(backrouter);
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+const prisma = new PrismaClient();
 let senderSocket: WebSocket | null = null;
 let receiverSocket: WebSocket | null = null;
 
-wss.on("connection", (ws: any) => {
-  ws.on("error", (err: any) => {
-    console.error("WebSocket error:", err);
-  });
+const clients: Map<WebSocket, { userId: string; groupId: number }> = new Map();
 
-  ws.on("message", (data: any) => {
+wss.on("connection", (ws: WebSocket) => {
+  ws.on("error", console.error);
+
+  ws.on("message", (data) => {
     const message = JSON.parse(data.toString());
-    console.log("Received message:", message.type);
 
-    switch (message.type) {
-      case "identifyasSender":
-        senderSocket = ws;
-        console.log("Sender connected");
-        break;
-
-      case "identifyasreceiver":
-        receiverSocket = ws;
-        console.log("Receiver connected");
-        break;
-
-      case "create-offer":
-        if (ws !== senderSocket) return;
-        if (receiverSocket) {
-          receiverSocket.send(JSON.stringify({ type: "offer", sdp: message.sdp }));
-        } else {
-          console.warn("Receiver not connected");
+    switch (message.medium) {
+      case "websocket":
+        if (message.type === "identify") {
+          clients.set(ws, { userId: message.userId, groupId: message.groupId });
+        } else if (message.type === "chat") {
+          const sender = clients.get(ws);
+          if (!sender) return;
+          wss.clients.forEach((client) => {
+            const info = clients.get(client);
+            if (client !== ws && info?.groupId === message.to && client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify(message));
+            }
+          });
         }
         break;
 
-      case "create-answer":
-        if (ws !== receiverSocket) return;
-        if (senderSocket) {
-          senderSocket.send(JSON.stringify({ type: "answer", sdp: message.sdp }));
-        } else {
-          console.warn("Sender not connected");
-        }
-        break;
-
-      case "iceCandidate":
-        const target =
-          ws === senderSocket ? receiverSocket : ws === receiverSocket ? senderSocket : null;
-        if (target) {
-          target.send(
-            JSON.stringify({ type: "iceCandidate", candidate: message.candidate })
-          );
-        } else {
-          console.warn("No target socket available for ICE candidate");
+      case "webrtc":
+        switch (message.type) {
+          case "identifyasSender":
+            senderSocket = ws;
+            break;
+          case "identifyasreceiver":
+            receiverSocket = ws;
+            break;
+          case "create-offer":
+            if (ws === senderSocket && receiverSocket) {
+              receiverSocket.send(JSON.stringify({ type: "offer", sdp: message.sdp }));
+            }
+            break;
+          case "create-answer":
+            if (ws === receiverSocket && senderSocket) {
+              senderSocket.send(JSON.stringify({ type: "answer", sdp: message.sdp }));
+            }
+            break;
+          case "iceCandidate":
+            const target =
+              ws === senderSocket ? receiverSocket :
+              ws === receiverSocket ? senderSocket : null;
+            if (target) {
+              target.send(JSON.stringify({ type: "iceCandidate", candidate: message.candidate }));
+            }
+            break;
         }
         break;
     }
   });
 
   ws.on("close", () => {
-    if (ws === senderSocket) {
-      console.log("Sender disconnected");
-      senderSocket = null;
-    } else if (ws === receiverSocket) {
-      console.log("Receiver disconnected");
-      receiverSocket = null;
-    }
+    if (ws === senderSocket) senderSocket = null;
+    if (ws === receiverSocket) receiverSocket = null;
+    clients.delete(ws);
   });
 });
+
+server.listen(6969,()=>{
+  console.log("Server is running on port 6969");
+})

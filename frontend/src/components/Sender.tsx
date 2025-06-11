@@ -15,13 +15,13 @@ export const Sender = () => {
 
     ws.onopen = () => {
       console.log("WebSocket connection established");
-      ws.send(JSON.stringify({ type: "identifyasSender" }));
+      ws.send(JSON.stringify({ medium:"webrtc",type: "identifyasSender" }));
     };
 
     peer.onicecandidate = (event) => {
       if (event.candidate) {
         console.log("Sending ICE candidate:", event.candidate);
-        ws.send(JSON.stringify({ type: "iceCandidate", candidate: event.candidate }));
+        ws.send(JSON.stringify({ medium:"webrtc",type: "iceCandidate", candidate: event.candidate }));  
       }
     };
 
@@ -30,7 +30,7 @@ export const Sender = () => {
         const offer = await peer.createOffer();
         await peer.setLocalDescription(offer);
         console.log("Sending offer...");
-        ws.send(JSON.stringify({ type: "create-offer", sdp: offer }));
+        ws.send(JSON.stringify({ medium:"webrtc",type: "create-offer", sdp: offer }));
       } catch (err) {
         console.error("Negotiation error:", err);
       }
@@ -38,7 +38,6 @@ export const Sender = () => {
 
     ws.onmessage = async (event) => {
       const message = JSON.parse(event.data);
-      console.log("Received message:", message);
 
       if (message.type === "answer") {
         await peer.setRemoteDescription(new RTCSessionDescription(message.sdp));

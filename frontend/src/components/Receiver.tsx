@@ -15,13 +15,13 @@ export const Receiver = () => {
 
     socket.onopen = () => {
       console.log("WebSocket connection established");
-      socket.send(JSON.stringify({ type: "identifyasreceiver" }));
+      socket.send(JSON.stringify({ type: "identifyasreceiver" ,medium:"webrtc"}));
     };
 
     peer.onicecandidate = (event) => {
       if (event.candidate) {
         console.log("Sending ICE candidate:", event.candidate);
-        socket.send(JSON.stringify({ type: "iceCandidate", candidate: event.candidate }));
+        socket.send(JSON.stringify({ type: "iceCandidate", candidate: event.candidate ,medium:"webrtc"}));
       }
     };
 
@@ -33,7 +33,7 @@ export const Receiver = () => {
         await peer.setRemoteDescription(new RTCSessionDescription(message.sdp));
         const answer = await peer.createAnswer();
         await peer.setLocalDescription(answer);
-        socket.send(JSON.stringify({ type: "create-answer", sdp: answer }));
+        socket.send(JSON.stringify({ type: "create-answer", sdp: answer,medium:"webrtc" }));
       } else if (message.type === "iceCandidate") {
         await peer.addIceCandidate(message.candidate);
       }
