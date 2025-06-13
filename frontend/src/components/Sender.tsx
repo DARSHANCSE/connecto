@@ -10,7 +10,7 @@ export const Sender = () => {
     const peer = new RTCPeerConnection();
     pc.current = peer;
 
-    const ws = new WebSocket("ws://localhost:6969");
+    const ws = new WebSocket("ws://192.168.137.81:6969");
     setSocket(ws);
 
     ws.onopen = () => {
@@ -59,6 +59,7 @@ export const Sender = () => {
     }
 
     try {
+      console.log("hell0")
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       streamRef.current = stream;
       if (videoref.current) videoref.current.srcObject = stream;

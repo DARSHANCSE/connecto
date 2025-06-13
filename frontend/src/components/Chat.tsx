@@ -9,7 +9,6 @@ export const Chat = ({ userId }) => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const [input, setInput] = useState('');
 
-    // Fetch groups for user
     useEffect(() => {
         if (!userId) {
             setError("User ID is required");
@@ -17,7 +16,7 @@ export const Chat = ({ userId }) => {
             return;
         }
 
-        axios.get(`http://localhost:6969/getgroups/${userId}`)
+        axios.get(`http://192.168.137.81:6969/getgroups/${userId}`)
             .then((res) => {
                 setGroups(res.data);
                 setIsLoading(false);
@@ -28,11 +27,10 @@ export const Chat = ({ userId }) => {
             });
     }, [userId]);
 
-    // Connect to WebSocket when group is selected
     useEffect(() => {
         if (!selectedGroup) return;
 
-        const ws = new WebSocket("ws://localhost:6969");
+        const ws = new WebSocket("ws://192.168.137.81:6969");
         setSocket(ws);
 
         ws.onopen = () => {
