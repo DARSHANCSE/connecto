@@ -1,22 +1,23 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-export const Chat = ({ userId }) => {
+export const Chat = ({ userId} : {userId : string}) => {
     const [groups, setGroups] = useState([]);
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
-    const [socket, setSocket] = useState<WebSocket | null>(null);
     const [input, setInput] = useState('');
+    const [socket, setSocket] = useState<WebSocket | null>(null);
 
     useEffect(() => {
+        console.log(userId)
         if (!userId) {
             setError("User ID is required");
             setIsLoading(false);
             return;
         }
 
-        axios.get(`http://192.168.137.81:6969/getgroups/${userId}`)
+        axios.get(`http://localhost:6969/getgroups/${userId}`)
             .then((res) => {
                 setGroups(res.data);
                 setIsLoading(false);
@@ -30,7 +31,7 @@ export const Chat = ({ userId }) => {
     useEffect(() => {
         if (!selectedGroup) return;
 
-        const ws = new WebSocket("ws://192.168.137.81:6969");
+        const ws = new WebSocket("ws://localhost:6969");
         setSocket(ws);
 
         ws.onopen = () => {

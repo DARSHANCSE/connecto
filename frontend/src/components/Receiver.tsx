@@ -10,7 +10,7 @@ export const Receiver = () => {
     const peer = new RTCPeerConnection();
     pc.current = peer;
 
-    const socket = new WebSocket("ws://192.168.137.81:6969");
+    const socket = new WebSocket("ws:/localhost:6969");
     socketRef.current = socket;
 
     socket.onopen = () => {

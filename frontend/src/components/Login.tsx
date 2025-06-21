@@ -7,7 +7,7 @@ export const Login = ({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("http://192.168.137.81:6969/login", {
+      const res = await axios.post("http://localhost:6969/login", {
         username,
         password,
       });

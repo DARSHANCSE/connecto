@@ -7,7 +7,7 @@ export default function Register({ setIsLoggedIn }: { setIsLoggedIn: (value: boo
 
   const handleRegister = async () => {
     try {
-      const res = await axios.post("http://192.168.137.81:6969/register", {
+      const res = await axios.post("http://localhost:6969/register", {
         username,
         password,
       });
