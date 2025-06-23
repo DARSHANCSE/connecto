@@ -1,10 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export const Login = ({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => void }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate = useNavigate();
   const handleLogin = async () => {
     try {
       const res = await axios.post("http://localhost:6969/login", {
@@ -15,6 +16,8 @@ export const Login = ({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
         console.log("Login successful", res.data);
         localStorage.setItem("token", res.data.token);
         setIsLoggedIn(true);
+        navigate("/home");
+        
       } else {
         alert(res.data.message || "Login failed");
       }

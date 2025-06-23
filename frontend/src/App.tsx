@@ -28,7 +28,7 @@ function App() {
       <Routes>
         {isLoggedIn && (
           <>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/*" element={<HomePage />} />
             <Route path="/sender" element={<Sender />} />
             <Route path="/receiver" element={<Receiver />} />
             <Route path="/chat" element={<Chat userId={userId} />} />
