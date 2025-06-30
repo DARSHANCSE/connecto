@@ -90,9 +90,9 @@ export const getGroupsHandler = async (req: Request, res: any) => {
 
 
 export const createGroupsHandler = async (req: Request, res: any) => {
-    const { groupName, userIds } = req.body;
+    const { name, userIds } = req.body;
 
-    if (!groupName || !Array.isArray(userIds) || userIds.length === 0) {
+    if (!name || !Array.isArray(userIds) || userIds.length === 0) {
         return res.status(400).json({ message: "Group name and user IDs are required" });
     }
 
@@ -103,7 +103,7 @@ export const createGroupsHandler = async (req: Request, res: any) => {
     try {
         const newGroup = await prismaclient.group.create({
             data: {
-                name: groupName,
+                name: name,
                 memberships: {
                     create: userIds.map((userId: string) => ({
                         userId,
@@ -147,6 +147,17 @@ export const getMessagesHandler = async (req: Request, res: any) => {
         res.status(200).json(messages);
     } catch (error) {
         console.error("Error fetching messages:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+export const getuserhandler = async (req: Request, res: any) => {  
+    try {
+        const users = await prismaclient.user.findMany();
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error fetching users:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 };
