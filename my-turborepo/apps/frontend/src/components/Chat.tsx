@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import axios from 'axios';
 
 
@@ -10,6 +10,8 @@ export const Chat = ({ userId} : {userId : string}) => {
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
     const [socket, setSocket] = useState<WebSocket | null>(null);
+
+    
 
     useEffect(() => {
         console.log(userId)
@@ -32,6 +34,11 @@ export const Chat = ({ userId} : {userId : string}) => {
 
     useEffect(() => {
         if (!selectedGroup) return;
+        const setMes=async () => {
+        const prevmess=await axios.get(`http://localhost:6969/getmessages/${selectedGroup.id}`);
+        setMessages(prevmess.data);
+        }
+        setMes();
 
         const ws = new WebSocket("ws://localhost:6969");
         setSocket(ws);
@@ -76,7 +83,7 @@ export const Chat = ({ userId} : {userId : string}) => {
 
         const msg = {
             type: 'chat',
-            from: userId,
+            fromId: userId,
             to: selectedGroup?.id,
             medium: 'websocket',
             content: input,
@@ -115,7 +122,7 @@ export const Chat = ({ userId} : {userId : string}) => {
             <ul style={{ listStyle: 'none', padding: 0 }}>
                 {messages.map((message) => (
                     <li key={message.id}>
-                        <strong>{message.sender.name}:</strong> {message.content}
+                        <strong>{message.fromId}:</strong> {message.content}
                     </li>
                 ))}
             </ul>

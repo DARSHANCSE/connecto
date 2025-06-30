@@ -6,7 +6,7 @@ dotenv.config();
 
 console.log(process.env.DATABASE_URL);
 const processMessage = async (message: any) => {
-    console.log("Processing message:", "eeee",message.fromId, message.toGrouprId, message.content);
+    console.log("Processing message:", "eeee",message.fromId, message, message.toGroupId, message.content);
 
     await prismaclient.message.create({
         data: {

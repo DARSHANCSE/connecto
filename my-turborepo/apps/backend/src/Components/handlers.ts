@@ -125,3 +125,28 @@ export const createGroupsHandler = async (req: Request, res: any) => {
 };
 
 
+
+export const getMessagesHandler = async (req: Request, res: any) => {
+    const groupId = req.params.groupId;
+
+    if (!groupId) {
+        return res.status(400).json({ message: "Group ID is required" });
+    }
+
+    try {
+        console.log("Fetching messages for group:", groupId);
+        const messages = await prismaclient.message.findMany({
+            where: {
+                toGroupId: parseInt(groupId),
+            },
+            include: {
+                from: true
+            },
+        });
+
+        res.status(200).json(messages);
+    } catch (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};

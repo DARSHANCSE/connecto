@@ -38,7 +38,7 @@ wss.on("connection", (ws: WebSocket) => {
           console.log(sender,message.from, message.to, message.content);
           redis.rpush("messagequeue", JSON.stringify({
             content: message.content,
-            fromId: message.from,
+            fromId: message.fromId,
             toGroupId: message.to,
           }));
 
